@@ -1,0 +1,15 @@
+<h1>Admin Dashboard</h1>
+
+<h2>Current Candidates from Blockchain</h2>
+<ul>
+    {% for candidate in candidates %}
+        <li>{{ candidate.name }} - Votes: {{ candidate.vote_count }}</li>
+    {% endfor %}
+</ul>
+
+<h2>Add New Candidate</h2>
+<a href="{% url 'set_voting_timeframe' %}">Set Voting Timeframe</a>
+<br>
+
+<a href="{% url 'add_candidate' %}">Add Candidate</a>
+ 

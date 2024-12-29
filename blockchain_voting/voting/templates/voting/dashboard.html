@@ -1,0 +1,22 @@
+<h1>Student Dashboard</h1>
+{% if messages %}
+    <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<ul>
+    {% for candidate in candidates %}
+        <li>
+            <strong>{{ candidate.name }}</strong> - {{ candidate.vote_count }} votes
+            <p>{{ candidate.description }}</p>
+            {% if candidate.image %}
+                <img src="{{ candidate.image.url }}" alt="{{ candidate.name }}" style="max-width: 200px; height: auto;" />
+            {% endif %}
+            <a href="{% url 'vote' candidate.id %}">Vote</a>
+        </li>
+        <hr>
+    {% endfor %}
+</ul>

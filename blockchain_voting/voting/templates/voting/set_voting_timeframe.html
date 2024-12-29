@@ -1,0 +1,15 @@
+<h1>Set Voting Timeframe</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+
+<script>
+    // Apply Flatpickr to datetime fields
+    flatpickr("input[type='datetime-local']", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: true
+    });
+</script>
