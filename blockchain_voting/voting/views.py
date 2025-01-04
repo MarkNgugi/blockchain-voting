@@ -4,7 +4,7 @@ import json
 from django.contrib import messages
 from .models import *
 from .forms import *
-
+ 
 # Connect to Ganache
 ganache_url = "http://127.0.0.1:8545"
 web3 = Web3(Web3.HTTPProvider(ganache_url))
@@ -23,7 +23,7 @@ web3 = Web3(Web3.HTTPProvider(ganache_url))
 
 def get_contract():
     abi_path = "voting_system/blockchain/build/Voting_sol_Voting.abi"
-    contract_address = "0x19c0129A4B40B371C7dDF4996c53502575fa0dAF"
+    contract_address = "0xdC439D6B423838fBA2fdB50053eb4B06A9B7f8a9"
     checksum_address = Web3.to_checksum_address(contract_address)
 
     with open(abi_path) as abi_file:
@@ -51,8 +51,9 @@ def dashboard(request):
     timeframe = VotingTimeframe.objects.first()
 
     if not timeframe:
-        messages.error(request, "Voting timeframe is not set.")
-        return render(request, "voting/not_available.html", {"message": "Voting timeframe has not been set by the admin."})
+        # messages.error(request, "Voting timeframe is not set.")
+        # return render(request, "voting/not_available.html", {"message": "Voting timeframe has not been set by the admin."})
+        return render(request,'voting/not_available.html')
 
     start_time = timeframe.start_time
     end_time = timeframe.end_time
