@@ -25,4 +25,5 @@ tx_hash = Voting.constructor().transact({'from': account})
 tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
 
 print(f"Contract deployed at address: {tx_receipt.contractAddress}")
+
   

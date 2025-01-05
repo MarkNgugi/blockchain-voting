@@ -1,6 +1,172 @@
-<h1>Add New Candidate</h1>
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Add Candidate</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Candidate</title>
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #F5F8FA;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        /* Card Layout */
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1), -10px -10px 20px rgba(255, 255, 255, 0.7);
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #4A90E2;
+            margin-bottom: 20px;
+        }
+
+        /* Form Styling */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        label {
+            font-size: 1.1em;
+            color: #4A4A4A;
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        /* Form Inputs */
+        input[type="text"],
+        textarea,
+        input[type="file"] {
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            background-color: #F0F4F8;
+            font-size: 1.1em;
+            color: #4A4A4A;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        input[type="file"]:focus {
+            background-color: #E1E9F1;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1), inset -4px -4px 10px rgba(255, 255, 255, 0.6);
+            outline: none;
+        }
+
+        /* Textarea for description */
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Button Styling */
+        button[type="submit"] {
+            padding: 15px;
+            background-color: #4A90E2;
+            color: white;
+            font-size: 1.1em;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button[type="submit"]:hover {
+            background-color: #357ABD;
+            transform: translateY(-3px);
+        }
+
+        /* Custom File Input */
+        .file-input-button {
+            padding: 15px;
+            background-color: #4A90E2;
+            color: white;
+            font-size: 1.1em;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .file-input-button:hover {
+            background-color: #357ABD;
+            transform: translateY(-3px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            header {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            Add New Candidate
+        </header>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Candidate Name Input -->
+            <div class="form-group">
+                <label for="id_name">Candidate Name</label><br>
+                {{ form.name }}
+            </div>
+
+            <!-- Description Input -->
+            <div class="form-group">
+                <label for="id_description">Description</label>
+                {{ form.description }}
+            </div>
+
+            <!-- Image Upload Input -->
+            <div class="form-group">
+                <label for="id_image">Upload Image</label>
+                {{ form.image }}
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit">Add Candidate</button>
+        </form>
+    </div>
+
+</body>
+</html>

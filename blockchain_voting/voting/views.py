@@ -4,6 +4,10 @@ import json
 from django.contrib import messages
 from .models import *
 from .forms import *
+from django.contrib.auth import authenticate, login
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
+
  
 # Connect to Ganache
 ganache_url = "http://127.0.0.1:8545"
@@ -23,7 +27,7 @@ web3 = Web3(Web3.HTTPProvider(ganache_url))
 
 def get_contract():
     abi_path = "voting_system/blockchain/build/Voting_sol_Voting.abi"
-    contract_address = "0xdC439D6B423838fBA2fdB50053eb4B06A9B7f8a9"
+    contract_address = "0x7F0a4e2Cc173Dc51A49D69A1b930d449D7d6737f"
     checksum_address = Web3.to_checksum_address(contract_address)
 
     with open(abi_path) as abi_file:
@@ -46,14 +50,71 @@ from django.shortcuts import render
 from django.contrib import messages
 from .models import Candidate, VotingTimeframe
 
+
+
+def student_register(request):
+    if request.method == "POST":
+        form = StudentRegistrationForm(request.POST)
+        if form.is_valid():
+            admission_number = form.cleaned_data['admission_number']
+            
+            # Check if the admission number is valid
+            if not ValidAdmissionNumber.objects.filter(admission_number=admission_number).exists():
+                messages.error(request, "Invalid admission number. Please ensure your admission number is valid.")
+                return render(request, 'voting/register.html', {'form': form})
+            
+            # Check if the admission number already exists in the User model
+            if User.objects.filter(username=admission_number).exists():
+                messages.error(request, "This admission number is already registered.")
+                return render(request, 'voting/register.html', {'form': form})
+            
+            password = form.cleaned_data['password']
+
+            # Create a new User account for the student
+            user = User.objects.create_user(username=admission_number, password=password)
+            user.save()
+
+            # Link the User to the Student model
+            student = form.save(commit=False)
+            student.user = user
+            student.save()
+
+            messages.success(request, "Registration successful!")
+            return redirect('dashboard')  
+
+    else:
+        form = StudentRegistrationForm()
+
+    return render(request, 'voting/register.html', {'form': form})
+
+
+def student_login(request):
+    if request.method == "POST":
+        form = StudentLoginForm(request.POST)
+        if form.is_valid():
+            admission_number = form.cleaned_data['admission_number']
+            password = form.cleaned_data['password']
+
+            # Authenticate the student
+            user = authenticate(username=admission_number, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('dashboard') 
+
+            messages.error(request, "Invalid admission number or password.")
+    
+    else:
+        form = StudentLoginForm()
+
+    return render(request, 'voting/login.html', {'form': form})   
+ 
+@login_required
 def dashboard(request):
     current_time = timezone.now()
     timeframe = VotingTimeframe.objects.first()
 
     if not timeframe:
-        # messages.error(request, "Voting timeframe is not set.")
-        # return render(request, "voting/not_available.html", {"message": "Voting timeframe has not been set by the admin."})
-        return render(request,'voting/not_available.html')
+        return render(request, 'voting/not_available.html')
 
     start_time = timeframe.start_time
     end_time = timeframe.end_time
@@ -65,27 +126,64 @@ def dashboard(request):
         messages.info(request, f"Voting will start at {start_time}.")
         return render(request, "voting/not_available.html", {"message": f"Voting will start at {start_time}."})
 
+    # Voting has ended, show the final results
     if current_time > end_time:
-        messages.info(request, "Voting has ended.")
-        return render(request, "voting/not_available.html", {"message": "Voting has ended. Results will be displayed soon."})
+        # Fetch candidates from the blockchain
+        contract = get_contract()
+        candidates_count = contract.functions.candidatesCount().call()
+
+        candidates_from_contract = [
+            contract.functions.getCandidate(i).call()
+            for i in range(candidates_count)
+        ]
+
+        # Filter out "Candidate 1" and "Candidate 2" from the list
+        candidates_with_votes = [
+            {"name": candidate[0], "id": i, "vote_count": candidate[1]}
+            for i, candidate in enumerate(candidates_from_contract)
+            if candidate[0] not in ["Candidate 1", "Candidate 2"]
+        ]
+
+        # Prepare context to display the candidates and their votes from blockchain
+        context = {
+            "candidates_from_blockchain": candidates_with_votes,
+            "message": "Voting has ended. Results will be displayed below."
+        }
+
+        return render(request, "voting/not_available.html", context)
 
     # Voting is active, show candidates
-    candidates = Candidate.objects.all()  # This will now have the updated vote counts
-    return render(request, "voting/dashboard.html", {"candidates": candidates})
+    contract = get_contract()
+    candidates_count = contract.functions.candidatesCount().call()
 
+    candidates_from_contract = [
+        contract.functions.getCandidate(i).call()
+        for i in range(candidates_count)
+    ]
 
+    candidates_with_votes = [
+        {"name": candidate[0], "id": i, "vote_count": candidate[1]}
+        for i, candidate in enumerate(candidates_from_contract)
+        if candidate[0] not in ["Candidate 1", "Candidate 2"]
+    ]
 
+    # Candidates from the Django model
+    candidates_from_model = Candidate.objects.all()
 
+    # Prepare context to display the candidates and their votes from blockchain
+    context = {
+        "candidates_from_blockchain": candidates_with_votes,
+        "candidates_from_model": candidates_from_model,
+    }
 
-
-
-
+    return render(request, "voting/dashboard.html", context)
 
 
 
 
 
 # Vote for a candidate
+@login_required
 def vote(request, candidate_id):
     contract = get_contract()
     user_address = web3.eth.accounts[1]  # Assuming student is using the second account
@@ -135,22 +233,28 @@ def vote(request, candidate_id):
 
 
 
-
-
-
-# Admin Dashboard
+@staff_member_required
 def admin_dashboard(request):
+
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('admin_login')
+    
     contract = get_contract()
+
+    candidates_count = contract.functions.candidatesCount().call()
+    print("Number of candidates:", candidates_count)
     
     # Fetch candidates from the blockchain
     candidates_from_contract = [
         contract.functions.getCandidate(i).call()
-        for i in range(contract.functions.candidatesCount().call())
+        for i in range(candidates_count)
     ]
     
+    # Filter out "Candidate 1" and "Candidate 2" from the list
     candidates_with_votes = [
         {"name": candidate[0], "id": i, "vote_count": candidate[1]}
         for i, candidate in enumerate(candidates_from_contract)
+        if candidate[0] not in ["Candidate 1", "Candidate 2"]
     ]
 
     candidates_from_model = Candidate.objects.all()
@@ -160,7 +264,7 @@ def admin_dashboard(request):
         "candidates_from_model": candidates_from_model,
     })
 
-# Add Candidate (Admin only)
+
 # Add Candidate (Admin only)
 def add_candidate(request):
     if request.method == "POST":

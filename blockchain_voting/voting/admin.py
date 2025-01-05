@@ -7,3 +7,5 @@ class CandidateAdmin(admin.ModelAdmin):
 
 admin.site.register(Candidate, CandidateAdmin)
 admin.site.register(VotingTimeframe)
+admin.site.register(Student)
+admin.site.register(ValidAdmissionNumber)

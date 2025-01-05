@@ -1,15 +1,157 @@
-<h1>Admin Dashboard</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
 
-<h2>Current Candidates from Blockchain</h2>
-<ul>
-    {% for candidate in candidates %}
-        <li>{{ candidate.name }} - Votes: {{ candidate.vote_count }}</li>
-    {% endfor %}
-</ul>
+        header {
+            background-color: #333;
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            font-size: 2.5em;
+        }
 
-<h2>Add New Candidate</h2>
-<a href="{% url 'set_voting_timeframe' %}">Set Voting Timeframe</a>
-<br>
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
 
-<a href="{% url 'add_candidate' %}">Add Candidate</a>
- 
+        h2 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f1f1f1;
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+
+        li {
+            font-size: 1.1em;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .actions {
+            margin-top: 30px;
+        }
+
+        .actions a {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            display: inline-block;
+            margin-right: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .actions a:hover {
+            background-color: #0056b3;
+        }
+
+        .message {
+            background-color: #e9f7ff;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+            color: #007bff;
+            font-size: 1.1em;
+        }
+
+        .card {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                font-size: 2em;
+                padding: 20px 0;
+            }
+
+            .container {
+                width: 100%;
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            .actions a {
+                padding: 12px 20px;
+                font-size: 1em;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        Admin Dashboard
+    </header>
+
+    <div class="container">
+        <!-- Message Section -->
+        {% if messages %}
+            <div class="message">
+                <ul>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Candidates List Section -->
+        <div class="card">
+            <h2>Current Candidates from Blockchain</h2>
+            <ul>
+                {% if candidates %}
+                    {% for candidate in candidates %}
+                        <li>{{ candidate.name }} - Votes: {{ candidate.vote_count }}</li>
+                    {% endfor %}
+                {% else %}
+                    <li>No candidates available</li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Add New Candidate Section -->
+        <div class="card actions">
+            <h2>Add New Candidate</h2>
+            <a href="{% url 'set_voting_timeframe' %}">Set Voting Timeframe</a>
+            <a href="{% url 'add_candidate' %}">Add Candidate</a>
+        </div>
+    </div>
+
+</body>
+</html>
